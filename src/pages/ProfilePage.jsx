@@ -1,4 +1,3 @@
-// Kode baru
 import { useState, useEffect } from 'react';
 import { User, Camera, Edit2, Heart, History, Trash2, Save, X, Sparkles } from 'lucide-react';
 import userService from '../services/userService';
@@ -20,6 +19,28 @@ export default function ProfilePage({ onFishClick }) {
     setProfile(userProfile);
     setEditedUsername(userProfile.username);
   }, []);
+
+  // --- PERBAIKAN BUG JAM (Format Date Helper) ---
+  const formatDate = (isoString) => {
+    if (!isoString) return '';
+    
+    // Trik: Jika string tanggal tidak punya akhiran "Z" atau "+", browser mengira itu waktu lokal.
+    // Kita tambahkan "Z" manual agar dibaca sebagai UTC, lalu browser akan otomatis 
+    // mengubahnya ke WIB (atau zona waktu user).
+    const dateValue = isoString.endsWith('Z') || isoString.includes('+') 
+      ? isoString 
+      : `${isoString}Z`;
+
+    return new Date(dateValue).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false // Format 24 jam
+    });
+  };
+  // ----------------------------------------------
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -302,14 +323,9 @@ export default function ProfilePage({ onFishClick }) {
                             <p className="font-semibold text-aqua-dark">
                               {item.search_query}
                             </p>
+                            {/* --- GUNAKAN HELPER DISINI --- */}
                             <p className="text-sm text-aqua-dark/60">
-                              {new Date(item.created_at).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              {formatDate(item.created_at)}
                             </p>
                           </div>
                         </div>
